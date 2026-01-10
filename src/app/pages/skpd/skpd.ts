@@ -1,4 +1,4 @@
-import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -8,11 +8,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmationService, MessageService } from 'primeng/api';
-
-interface Skpd {
-  id: number;
-  nama: string;
-}
+import { SkpdService, Skpd, SkpdFormData } from '../../services/skpd.service';
 
 const PAGE_SIZE = 10;
 
@@ -33,50 +29,30 @@ const PAGE_SIZE = 10;
   styleUrl: './skpd.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SkpdComponent {
+export class SkpdComponent implements OnInit {
   protected readonly dialogVisible = signal(false);
   protected readonly submitted = signal(false);
   protected readonly searchQuery = signal('');
-  protected readonly currentPage = signal(1);
+  protected readonly loading = signal(false);
 
-  // Mock data SKPD
-  protected readonly data = signal<Skpd[]>([
-    { id: 1, nama: 'Dinas Pendidikan' },
-    { id: 2, nama: 'Dinas Kesehatan' },
-    { id: 3, nama: 'Dinas Pekerjaan Umum dan Penataan Ruang' },
-    { id: 4, nama: 'Dinas Sosial' },
-    { id: 5, nama: 'Dinas Perhubungan' },
-    { id: 6, nama: 'Dinas Kependudukan dan Pencatatan Sipil' },
-    { id: 7, nama: 'Dinas Lingkungan Hidup' },
-    { id: 8, nama: 'Badan Perencanaan Pembangunan Daerah' },
-    { id: 9, nama: 'Badan Kepegawaian Daerah' },
-    { id: 10, nama: 'Inspektorat' },
-    { id: 11, nama: 'Kecamatan Banguntapan' },
-    { id: 12, nama: 'Kecamatan Sewon' },
-    { id: 13, nama: 'Kecamatan Kasihan' },
-    { id: 14, nama: 'Kecamatan Bantul' },
-    { id: 15, nama: 'Dinas Pertanian' },
-  ]);
+  // API data
+  protected readonly data = signal<Skpd[]>([]);
+  protected readonly nextCursor = signal<string | null>(null);
+  protected readonly prevCursor = signal<string | null>(null);
 
-  // Filtered data based on search
+  // Filtered data based on search (client-side filtering)
   protected readonly filteredData = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     if (!query) return this.data();
     return this.data().filter((d) => d.nama.toLowerCase().includes(query));
   });
 
-  // Data to display (paginated)
-  protected readonly displayData = computed(() => {
-    const start = (this.currentPage() - 1) * PAGE_SIZE;
-    return this.filteredData().slice(start, start + PAGE_SIZE);
-  });
-
   protected readonly hasNextPage = computed(() => {
-    return this.currentPage() * PAGE_SIZE < this.filteredData().length;
+    return this.nextCursor() !== null;
   });
 
   protected readonly hasPrevPage = computed(() => {
-    return this.currentPage() > 1;
+    return this.prevCursor() !== null;
   });
 
   protected currentItem = signal<Partial<Skpd>>({});
@@ -85,22 +61,49 @@ export class SkpdComponent {
   constructor(
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-  ) {}
+    private skpdService: SkpdService,
+  ) { }
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(cursor?: string): void {
+    this.loading.set(true);
+    this.skpdService.getAll(cursor).subscribe({
+      next: (response) => {
+        this.data.set(response.data);
+        this.nextCursor.set(response.next_cursor);
+        this.prevCursor.set(response.prev_cursor);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Gagal memuat data SKPD',
+        });
+        this.loading.set(false);
+        console.error('Error loading SKPD data:', error);
+      },
+    });
+  }
 
   onSearch(query: string): void {
     this.searchQuery.set(query);
-    this.currentPage.set(1); // Reset to first page on search
   }
 
   nextPage(): void {
-    if (this.hasNextPage()) {
-      this.currentPage.update((p) => p + 1);
+    const cursor = this.nextCursor();
+    if (cursor) {
+      this.loadData(cursor);
     }
   }
 
   prevPage(): void {
-    if (this.hasPrevPage()) {
-      this.currentPage.update((p) => p - 1);
+    const cursor = this.prevCursor();
+    if (cursor) {
+      this.loadData(cursor);
     }
   }
 
@@ -127,11 +130,25 @@ export class SkpdComponent {
       rejectLabel: 'Batal',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.data.update((list) => list.filter((d) => d.id !== item.id));
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Berhasil',
-          detail: 'SKPD berhasil dihapus',
+        this.loading.set(true);
+        this.skpdService.delete(item.uuid).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Berhasil',
+              detail: 'SKPD berhasil dihapus',
+            });
+            this.loadData(); // Reload data from first page
+          },
+          error: (error) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Gagal menghapus SKPD',
+            });
+            this.loading.set(false);
+            console.error('Error deleting SKPD:', error);
+          },
         });
       },
     });
@@ -150,24 +167,55 @@ export class SkpdComponent {
       return;
     }
 
-    if (this.isEditMode()) {
-      this.data.update((list) => list.map((d) => (d.id === current.id ? (current as Skpd) : d)));
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Berhasil',
-        detail: 'SKPD berhasil diperbarui',
+    const formData: SkpdFormData = {
+      nama: current.nama,
+    };
+
+    this.loading.set(true);
+
+    if (this.isEditMode() && current.uuid) {
+      this.skpdService.update(current.uuid, formData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Berhasil',
+            detail: 'SKPD berhasil diperbarui',
+          });
+          this.dialogVisible.set(false);
+          this.loadData(); // Reload data
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Gagal memperbarui SKPD',
+          });
+          this.loading.set(false);
+          console.error('Error updating SKPD:', error);
+        },
       });
     } else {
-      const newId = Math.max(...this.data().map((d) => d.id), 0) + 1;
-      this.data.update((list) => [...list, { id: newId, nama: current.nama! }]);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Berhasil',
-        detail: 'SKPD berhasil ditambahkan',
+      this.skpdService.create(formData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Berhasil',
+            detail: 'SKPD berhasil ditambahkan',
+          });
+          this.dialogVisible.set(false);
+          this.loadData(); // Reload data
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Gagal menambahkan SKPD',
+          });
+          this.loading.set(false);
+          console.error('Error creating SKPD:', error);
+        },
       });
     }
-
-    this.dialogVisible.set(false);
   }
 
   updateNama(value: string): void {

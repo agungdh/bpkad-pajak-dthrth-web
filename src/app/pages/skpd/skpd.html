@@ -13,25 +13,14 @@
   <ng-template #end>
     <div class="search-box">
       <i class="pi pi-search"></i>
-      <input
-        pInputText
-        type="text"
-        placeholder="Cari SKPD..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="onSearch($event)"
-      />
+      <input pInputText type="text" placeholder="Cari SKPD..." [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)" />
     </div>
   </ng-template>
 </p-toolbar>
 
-<p-table
-  [value]="displayData()"
-  [tableStyle]="{ 'min-width': '30rem' }"
-  [rowHover]="true"
-  dataKey="id"
-  styleClass="crud-table"
-  responsiveLayout="scroll"
->
+<p-table [value]="filteredData()" [loading]="loading()" [tableStyle]="{ 'min-width': '30rem' }" [rowHover]="true"
+  dataKey="uuid" styleClass="crud-table" responsiveLayout="scroll">
   <ng-template #header>
     <tr>
       <th>Nama SKPD</th>
@@ -43,22 +32,10 @@
       <td>{{ item.nama }}</td>
       <td>
         <div class="action-buttons">
-          <p-button
-            icon="pi pi-pencil"
-            [rounded]="true"
-            [text]="true"
-            severity="info"
-            (click)="editItem(item)"
-            aria-label="Edit"
-          />
-          <p-button
-            icon="pi pi-trash"
-            [rounded]="true"
-            [text]="true"
-            severity="danger"
-            (click)="deleteItem(item)"
-            aria-label="Hapus"
-          />
+          <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editItem(item)"
+            aria-label="Edit" />
+          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteItem(item)"
+            aria-label="Hapus" />
         </div>
       </td>
     </tr>
@@ -72,48 +49,22 @@
 
 <!-- Cursor Pagination -->
 <div class="cursor-pagination">
-  <p-button
-    icon="pi pi-chevron-left"
-    label="Sebelumnya"
-    [outlined]="true"
-    [disabled]="!hasPrevPage()"
-    (click)="prevPage()"
-  />
-  <span class="page-info">Halaman {{ currentPage() }}</span>
-  <p-button
-    icon="pi pi-chevron-right"
-    iconPos="right"
-    label="Selanjutnya"
-    [outlined]="true"
-    [disabled]="!hasNextPage()"
-    (click)="nextPage()"
-  />
+  <p-button icon="pi pi-chevron-left" label="Sebelumnya" [outlined]="true" [disabled]="!hasPrevPage()"
+    (click)="prevPage()" />
+  <span class="page-info">Navigasi Data</span>
+  <p-button icon="pi pi-chevron-right" iconPos="right" label="Selanjutnya" [outlined]="true" [disabled]="!hasNextPage()"
+    (click)="nextPage()" />
 </div>
 
 <!-- Create/Edit Dialog -->
-<p-dialog
-  [(visible)]="dialogVisible"
-  [header]="isEditMode() ? 'Edit SKPD' : 'Tambah SKPD'"
-  [modal]="true"
-  [style]="{ width: '400px' }"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="crud-dialog"
->
+<p-dialog [(visible)]="dialogVisible" [header]="isEditMode() ? 'Edit SKPD' : 'Tambah SKPD'" [modal]="true"
+  [style]="{ width: '400px' }" [draggable]="false" [resizable]="false" styleClass="crud-dialog">
   <div class="form-field">
     <label for="nama">Nama SKPD</label>
-    <input
-      pInputText
-      id="nama"
-      [ngModel]="currentItem().nama"
-      (ngModelChange)="updateNama($event)"
-      required
-      autofocus
-      placeholder="Masukkan nama SKPD"
-      [class.ng-invalid]="submitted() && !currentItem().nama"
-    />
+    <input pInputText id="nama" [ngModel]="currentItem().nama" (ngModelChange)="updateNama($event)" required autofocus
+      placeholder="Masukkan nama SKPD" [class.ng-invalid]="submitted() && !currentItem().nama" />
     @if (submitted() && !currentItem().nama) {
-      <small class="error-text">Nama SKPD wajib diisi.</small>
+    <small class="error-text">Nama SKPD wajib diisi.</small>
     }
   </div>
 
