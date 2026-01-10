@@ -1,0 +1,64 @@
+<!-- Mobile Drawer Sidebar -->
+<p-drawer [(visible)]="sidebarVisible" [showCloseIcon]="false" styleClass="layout-sidebar-drawer">
+    <ng-template #headless>
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <span class="sidebar-logo">BPKAD Pajak</span>
+                <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="secondary"
+                    (click)="closeSidebar()" aria-label="Tutup menu" />
+            </div>
+            <nav class="sidebar-nav">
+                @for (item of menuItems; track item.route) {
+                <a class="nav-item" [routerLink]="item.route" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }" (click)="closeSidebar()" pRipple>
+                    <i [class]="item.icon"></i>
+                    <span>{{ item.label }}</span>
+                </a>
+                }
+            </nav>
+        </div>
+    </ng-template>
+</p-drawer>
+
+<!-- Desktop Sidebar -->
+<aside class="desktop-sidebar">
+    <div class="sidebar-content">
+        <div class="sidebar-header">
+            <span class="sidebar-logo">BPKAD Pajak</span>
+        </div>
+        <nav class="sidebar-nav">
+            @for (item of menuItems; track item.route) {
+            <a class="nav-item" [routerLink]="item.route" routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }" pRipple>
+                <i [class]="item.icon"></i>
+                <span>{{ item.label }}</span>
+            </a>
+            }
+        </nav>
+    </div>
+</aside>
+
+<!-- Main Content Area -->
+<div class="main-wrapper">
+    <!-- Header -->
+    <header class="main-header">
+        <p-button class="menu-toggle" icon="pi pi-bars" [rounded]="true" [text]="true" severity="secondary"
+            (click)="toggleSidebar()" aria-label="Toggle menu" />
+        <h1 class="header-title">Admin Dashboard</h1>
+        <div class="header-actions">
+            <p-button icon="pi pi-bell" [rounded]="true" [text]="true" severity="secondary" [badge]="'3'"
+                badgeSeverity="danger" aria-label="Notifikasi" />
+            <p-button icon="pi pi-user" [rounded]="true" [text]="true" severity="secondary" aria-label="Profil" />
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="main-content">
+        <router-outlet />
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <span>&copy; 2026 BPKAD Pajak. All rights reserved.</span>
+    </footer>
+</div>
