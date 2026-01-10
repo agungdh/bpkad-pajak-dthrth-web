@@ -3,15 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Skpd {
-  id: number;
   uuid: string;
   nama: string;
-  created_at?: number;
-  updated_at?: number;
-  created_by?: number;
-  updated_by?: number;
-  deleted_at?: number;
-  deleted_by?: number;
 }
 
 export interface SkpdPaginationResponse {
