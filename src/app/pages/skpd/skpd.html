@@ -8,31 +8,19 @@
 
 <p-toolbar styleClass="crud-toolbar">
   <ng-template #start>
-    <p-button label="Tambah" icon="pi pi-plus" severity="primary" (click)="openNew()" />
+    <p-button label="Tambah" icon="pi pi-plus" severity="primary" (click)="openNew()" [disabled]="loading()" />
   </ng-template>
   <ng-template #end>
     <div class="search-box">
       <i class="pi pi-search"></i>
-      <input
-        pInputText
-        type="text"
-        placeholder="Cari SKPD..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="onSearch($event)"
-      />
+      <input pInputText type="text" placeholder="Cari SKPD..." [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)" />
     </div>
   </ng-template>
 </p-toolbar>
 
-<p-table
-  [value]="data()"
-  [loading]="loading()"
-  [tableStyle]="{ 'min-width': '30rem' }"
-  [rowHover]="true"
-  dataKey="uuid"
-  styleClass="crud-table"
-  responsiveLayout="scroll"
->
+<p-table [value]="data()" [loading]="loading()" [tableStyle]="{ 'min-width': '30rem' }" [rowHover]="true" dataKey="uuid"
+  styleClass="crud-table" responsiveLayout="scroll">
   <ng-template #header>
     <tr>
       <th>Nama SKPD</th>
@@ -44,22 +32,10 @@
       <td>{{ item.nama }}</td>
       <td>
         <div class="action-buttons">
-          <p-button
-            icon="pi pi-pencil"
-            [rounded]="true"
-            [text]="true"
-            severity="info"
-            (click)="editItem(item)"
-            aria-label="Edit"
-          />
-          <p-button
-            icon="pi pi-trash"
-            [rounded]="true"
-            [text]="true"
-            severity="danger"
-            (click)="deleteItem(item)"
-            aria-label="Hapus"
-          />
+          <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (click)="editItem(item)"
+            aria-label="Edit" [disabled]="loading()" />
+          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="deleteItem(item)"
+            aria-label="Hapus" [disabled]="loading()" />
         </div>
       </td>
     </tr>
@@ -72,53 +48,29 @@
 </p-table>
 
 <!-- Cursor Pagination -->
+<!-- Cursor Pagination -->
 <div class="cursor-pagination">
-  <p-button
-    icon="pi pi-chevron-left"
-    label="Sebelumnya"
-    [outlined]="true"
-    [disabled]="!hasPrevPage()"
-    (click)="prevPage()"
-  />
+  <p-button icon="pi pi-chevron-left" label="Sebelumnya" [outlined]="true" [disabled]="!hasPrevPage() || loading()"
+    (click)="prevPage()" />
   <span class="page-info">Total: {{ totalCount() }} SKPD</span>
-  <p-button
-    icon="pi pi-chevron-right"
-    iconPos="right"
-    label="Selanjutnya"
-    [outlined]="true"
-    [disabled]="!hasNextPage()"
-    (click)="nextPage()"
-  />
+  <p-button icon="pi pi-chevron-right" iconPos="right" label="Selanjutnya" [outlined]="true"
+    [disabled]="!hasNextPage() || loading()" (click)="nextPage()" />
 </div>
 
 <!-- Create/Edit Dialog -->
-<p-dialog
-  [(visible)]="dialogVisible"
-  [header]="isEditMode() ? 'Edit SKPD' : 'Tambah SKPD'"
-  [modal]="true"
-  [style]="{ width: '400px' }"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="crud-dialog"
->
+<p-dialog [(visible)]="dialogVisible" [header]="isEditMode() ? 'Edit SKPD' : 'Tambah SKPD'" [modal]="true"
+  [style]="{ width: '400px' }" [draggable]="false" [resizable]="false" styleClass="crud-dialog">
   <div class="form-field">
     <label for="nama">Nama SKPD</label>
-    <input
-      pInputText
-      id="nama"
-      [ngModel]="currentItem().nama"
-      (ngModelChange)="updateNama($event)"
-      autofocus
-      placeholder="Masukkan nama SKPD"
-      [class.ng-invalid]="validationErrors()['nama']"
-    />
+    <input pInputText id="nama" [ngModel]="currentItem().nama" (ngModelChange)="updateNama($event)" autofocus
+      placeholder="Masukkan nama SKPD" [class.ng-invalid]="validationErrors()['nama']" [disabled]="loading()" />
     @if (validationErrors()['nama']) {
-      <small class="error-text">{{ validationErrors()['nama'][0] }}</small>
+    <small class="error-text">{{ validationErrors()['nama'][0] }}</small>
     }
   </div>
 
   <ng-template #footer>
-    <p-button label="Batal" icon="pi pi-times" [text]="true" (click)="hideDialog()" />
-    <p-button label="Simpan" icon="pi pi-check" (click)="saveItem()" />
+    <p-button label="Batal" icon="pi pi-times" [text]="true" (click)="hideDialog()" [disabled]="loading()" />
+    <p-button label="Simpan" icon="pi pi-check" (click)="saveItem()" [loading]="loading()" />
   </ng-template>
 </p-dialog>

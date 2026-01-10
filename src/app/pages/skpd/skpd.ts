@@ -1,4 +1,4 @@
-import { Component, signal, computed, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -8,6 +8,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { SkpdService, Skpd, SkpdFormData } from '../../services/skpd.service';
 
 const PAGE_SIZE = 10;
@@ -29,7 +30,7 @@ const PAGE_SIZE = 10;
   styleUrl: './skpd.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SkpdComponent implements OnInit {
+export class SkpdComponent implements OnInit, OnDestroy {
   protected readonly dialogVisible = signal(false);
   protected readonly submitted = signal(false);
   protected readonly searchQuery = signal('');
@@ -53,14 +54,33 @@ export class SkpdComponent implements OnInit {
   protected currentItem = signal<Partial<Skpd>>({});
   protected isEditMode = signal(false);
 
+  private readonly searchSubject = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
+
   constructor(
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private skpdService: SkpdService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
+
+    // Setup search debounce
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((query) => {
+        this.loadData(undefined, query);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadData(cursor?: string, search?: string): void {
@@ -88,20 +108,19 @@ export class SkpdComponent implements OnInit {
 
   onSearch(query: string): void {
     this.searchQuery.set(query);
-    // Reload data with search parameter from first page
-    this.loadData(undefined, query);
+    this.searchSubject.next(query);
   }
 
   nextPage(): void {
     const cursor = this.nextCursor();
-    if (cursor) {
+    if (cursor && !this.loading()) {
       this.loadData(cursor);
     }
   }
 
   prevPage(): void {
     const cursor = this.prevCursor();
-    if (cursor) {
+    if (cursor && !this.loading()) {
       this.loadData(cursor);
     }
   }
@@ -161,6 +180,8 @@ export class SkpdComponent implements OnInit {
   }
 
   saveItem(): void {
+    if (this.loading()) return;
+
     this.submitted.set(true);
     this.validationErrors.set({});
     const current = this.currentItem();
