@@ -38,8 +38,8 @@
   dataKey="uuid"
   styleClass="crud-table"
   responsiveLayout="scroll"
-  [customSort]="true"
-  (onSort)="onSort($event)"
+  [lazy]="true"
+  (onLazyLoad)="onLazyLoad($event)"
 >
   <ng-template #header>
     <tr>

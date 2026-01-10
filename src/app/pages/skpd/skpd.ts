@@ -7,7 +7,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -74,8 +74,6 @@ export class SkpdComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.loadData();
-
     // Setup search debounce
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
@@ -126,12 +124,16 @@ export class SkpdComponent implements OnInit, OnDestroy {
     this.searchSubject.next(query);
   }
 
-  onSort(event: SortEvent): void {
-    if (event.field) {
-      this.sortBy.set(event.field);
-      this.sortOrder.set(event.order === 1 ? 'asc' : 'desc');
-      this.loadData(); // Reload from start
+  onLazyLoad(event: TableLazyLoadEvent): void {
+    if (event.sortField) {
+      this.sortBy.set(event.sortField as string);
+      this.sortOrder.set(event.sortOrder === 1 ? 'asc' : 'desc');
+    } else {
+      this.sortBy.set(undefined);
+      this.sortOrder.set(undefined);
     }
+
+    this.loadData();
   }
 
   nextPage(): void {
