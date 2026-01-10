@@ -43,12 +43,6 @@
 }
 
 /* Dialog Form */
-.form-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
 .form-field {
     display: flex;
     flex-direction: column;
@@ -79,4 +73,51 @@
     :host ::ng-deep .crud-toolbar .p-button {
         margin-right: 0;
     }
+
+    .cursor-pagination {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+/* Search Box */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--p-text-muted-color);
+    pointer-events: none;
+}
+
+.search-box input {
+    padding-left: 2.25rem;
+    width: 250px;
+}
+
+@media (max-width: 576px) {
+    .search-box input {
+        width: 100%;
+    }
+}
+
+/* Cursor Pagination */
+.cursor-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--p-surface-card);
+    border-radius: var(--p-border-radius-lg);
+}
+
+.page-info {
+    font-size: 0.875rem;
+    color: var(--p-text-muted-color);
 }

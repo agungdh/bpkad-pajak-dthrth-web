@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout';
 import { DashboardComponent } from './pages/dashboard/dashboard';
-import { SampleCrudComponent } from './pages/sample-crud/sample-crud';
+import { SkpdComponent } from './pages/skpd/skpd';
 
 export const routes: Routes = [
     {
@@ -10,7 +10,7 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: DashboardComponent },
-            { path: 'sample-crud', component: SampleCrudComponent },
+            { path: 'skpd', component: SkpdComponent },
         ],
     },
 ];

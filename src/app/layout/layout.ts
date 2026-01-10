@@ -22,7 +22,7 @@ export class LayoutComponent {
 
     protected readonly menuItems: MenuItem[] = [
         { label: 'Dashboard', icon: 'pi pi-home', route: '/dashboard' },
-        { label: 'Data Master', icon: 'pi pi-database', route: '/sample-crud' },
+        { label: 'Data SKPD', icon: 'pi pi-building', route: '/skpd' },
         { label: 'Laporan', icon: 'pi pi-chart-bar', route: '/dashboard' },
         { label: 'Pengaturan', icon: 'pi pi-cog', route: '/dashboard' },
     ];
