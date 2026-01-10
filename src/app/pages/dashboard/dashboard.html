@@ -1,24 +1,28 @@
 <div class="dashboard-header">
-    <h2>Selamat Datang!</h2>
-    <p>Ringkasan data pajak hari ini</p>
+  <h2>Selamat Datang!</h2>
+  <p>Ringkasan data pajak hari ini</p>
 </div>
 
 <div class="stats-grid">
-    @for (stat of stats; track stat.title) {
+  @for (stat of stats; track stat.title) {
     <p-card styleClass="stat-card">
-        <div class="stat-content">
-            <div class="stat-icon" [class.trend-up]="stat.trendUp" [class.trend-down]="!stat.trendUp">
-                <i [class]="stat.icon"></i>
-            </div>
-            <div class="stat-info">
-                <span class="stat-title">{{ stat.title }}</span>
-                <span class="stat-value">{{ stat.value }}</span>
-                <span class="stat-trend" [class.trend-up]="stat.trendUp" [class.trend-down]="!stat.trendUp">
-                    <i [class]="stat.trendUp ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"></i>
-                    {{ stat.trend }}
-                </span>
-            </div>
+      <div class="stat-content">
+        <div class="stat-icon" [class.trend-up]="stat.trendUp" [class.trend-down]="!stat.trendUp">
+          <i [class]="stat.icon"></i>
         </div>
+        <div class="stat-info">
+          <span class="stat-title">{{ stat.title }}</span>
+          <span class="stat-value">{{ stat.value }}</span>
+          <span
+            class="stat-trend"
+            [class.trend-up]="stat.trendUp"
+            [class.trend-down]="!stat.trendUp"
+          >
+            <i [class]="stat.trendUp ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"></i>
+            {{ stat.trend }}
+          </span>
+        </div>
+      </div>
     </p-card>
-    }
+  }
 </div>
