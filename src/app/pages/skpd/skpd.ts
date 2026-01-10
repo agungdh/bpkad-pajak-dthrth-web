@@ -1,4 +1,11 @@
-import { Component, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -64,18 +71,14 @@ export class SkpdComponent implements OnInit, OnDestroy {
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private skpdService: SkpdService,
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
 
     // Setup search debounce
     this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      )
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe((query) => {
         this.loadData(undefined, query);
       });
@@ -96,24 +99,26 @@ export class SkpdComponent implements OnInit, OnDestroy {
     const sortBy = this.sortBy();
     const sortOrder = this.sortOrder();
 
-    this.loadSubscription = this.skpdService.getAll(cursor, searchParam, sortBy, sortOrder).subscribe({
-      next: (response) => {
-        this.data.set(response.data);
-        this.nextCursor.set(response.next_cursor);
-        this.prevCursor.set(response.prev_cursor);
-        this.totalCount.set(response.total);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Gagal memuat data SKPD',
-        });
-        this.loading.set(false);
-        console.error('Error loading SKPD data:', error);
-      },
-    });
+    this.loadSubscription = this.skpdService
+      .getAll(cursor, searchParam, sortBy, sortOrder)
+      .subscribe({
+        next: (response) => {
+          this.data.set(response.data);
+          this.nextCursor.set(response.next_cursor);
+          this.prevCursor.set(response.prev_cursor);
+          this.totalCount.set(response.total);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Gagal memuat data SKPD',
+          });
+          this.loading.set(false);
+          console.error('Error loading SKPD data:', error);
+        },
+      });
   }
 
   onSearch(query: string): void {
@@ -169,7 +174,7 @@ export class SkpdComponent implements OnInit, OnDestroy {
           detail: 'Gagal memuat detail SKPD',
         });
         this.loading.set(false);
-      }
+      },
     });
   }
 
