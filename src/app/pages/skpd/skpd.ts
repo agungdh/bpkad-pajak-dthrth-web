@@ -7,8 +7,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { ConfirmationService, MessageService, SortEvent } from 'primeng/api';
+import { Subject, Subscription, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { SkpdService, Skpd, SkpdFormData } from '../../services/skpd.service';
 
 const PAGE_SIZE = 10;
@@ -36,6 +36,8 @@ export class SkpdComponent implements OnInit, OnDestroy {
   protected readonly searchQuery = signal('');
   protected readonly loading = signal(false);
   protected readonly validationErrors = signal<Record<string, string>>({});
+  protected readonly sortBy = signal<string | undefined>(undefined);
+  protected readonly sortOrder = signal<string | undefined>(undefined);
 
   // API data
   protected readonly data = signal<Skpd[]>([]);
@@ -56,6 +58,7 @@ export class SkpdComponent implements OnInit, OnDestroy {
 
   private readonly searchSubject = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
+  private loadSubscription?: Subscription;
 
   constructor(
     private confirmationService: ConfirmationService,
@@ -84,9 +87,16 @@ export class SkpdComponent implements OnInit, OnDestroy {
   }
 
   loadData(cursor?: string, search?: string): void {
+    if (this.loadSubscription) {
+      this.loadSubscription.unsubscribe();
+    }
+
     this.loading.set(true);
     const searchParam = search !== undefined ? search : this.searchQuery();
-    this.skpdService.getAll(cursor, searchParam).subscribe({
+    const sortBy = this.sortBy();
+    const sortOrder = this.sortOrder();
+
+    this.loadSubscription = this.skpdService.getAll(cursor, searchParam, sortBy, sortOrder).subscribe({
       next: (response) => {
         this.data.set(response.data);
         this.nextCursor.set(response.next_cursor);
@@ -109,6 +119,14 @@ export class SkpdComponent implements OnInit, OnDestroy {
   onSearch(query: string): void {
     this.searchQuery.set(query);
     this.searchSubject.next(query);
+  }
+
+  onSort(event: SortEvent): void {
+    if (event.field) {
+      this.sortBy.set(event.field);
+      this.sortOrder.set(event.order === 1 ? 'asc' : 'desc');
+      this.loadData(); // Reload from start
+    }
   }
 
   nextPage(): void {
@@ -134,11 +152,25 @@ export class SkpdComponent implements OnInit, OnDestroy {
   }
 
   editItem(item: Skpd): void {
-    this.currentItem.set({ ...item });
-    this.isEditMode.set(true);
-    this.submitted.set(false);
-    this.validationErrors.set({});
-    this.dialogVisible.set(true);
+    this.loading.set(true);
+    this.skpdService.get(item.uuid).subscribe({
+      next: (data) => {
+        this.currentItem.set(data);
+        this.isEditMode.set(true);
+        this.submitted.set(false);
+        this.validationErrors.set({});
+        this.dialogVisible.set(true);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Gagal memuat detail SKPD',
+        });
+        this.loading.set(false);
+      }
+    });
   }
 
   deleteItem(item: Skpd): void {

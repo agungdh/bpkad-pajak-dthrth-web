@@ -20,10 +20,10 @@
 </p-toolbar>
 
 <p-table [value]="data()" [loading]="loading()" [tableStyle]="{ 'min-width': '30rem' }" [rowHover]="true" dataKey="uuid"
-  styleClass="crud-table" responsiveLayout="scroll">
+  styleClass="crud-table" responsiveLayout="scroll" [customSort]="true" (onSort)="onSort($event)">
   <ng-template #header>
     <tr>
-      <th>Nama SKPD</th>
+      <th pSortableColumn="nama">Nama SKPD <p-sortIcon field="nama" /></th>
       <th style="width: 8rem">Aksi</th>
     </tr>
   </ng-template>
