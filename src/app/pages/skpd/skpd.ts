@@ -34,18 +34,13 @@ export class SkpdComponent implements OnInit {
   protected readonly submitted = signal(false);
   protected readonly searchQuery = signal('');
   protected readonly loading = signal(false);
+  protected readonly validationErrors = signal<Record<string, string>>({});
 
   // API data
   protected readonly data = signal<Skpd[]>([]);
   protected readonly nextCursor = signal<string | null>(null);
   protected readonly prevCursor = signal<string | null>(null);
-
-  // Filtered data based on search (client-side filtering)
-  protected readonly filteredData = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    if (!query) return this.data();
-    return this.data().filter((d) => d.nama.toLowerCase().includes(query));
-  });
+  protected readonly totalCount = signal<number>(0);
 
   protected readonly hasNextPage = computed(() => {
     return this.nextCursor() !== null;
@@ -62,19 +57,21 @@ export class SkpdComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private skpdService: SkpdService,
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
-  loadData(cursor?: string): void {
+  loadData(cursor?: string, search?: string): void {
     this.loading.set(true);
-    this.skpdService.getAll(cursor).subscribe({
+    const searchParam = search !== undefined ? search : this.searchQuery();
+    this.skpdService.getAll(cursor, searchParam).subscribe({
       next: (response) => {
         this.data.set(response.data);
         this.nextCursor.set(response.next_cursor);
         this.prevCursor.set(response.prev_cursor);
+        this.totalCount.set(response.total);
         this.loading.set(false);
       },
       error: (error) => {
@@ -91,6 +88,8 @@ export class SkpdComponent implements OnInit {
 
   onSearch(query: string): void {
     this.searchQuery.set(query);
+    // Reload data with search parameter from first page
+    this.loadData(undefined, query);
   }
 
   nextPage(): void {
@@ -111,6 +110,7 @@ export class SkpdComponent implements OnInit {
     this.currentItem.set({});
     this.isEditMode.set(false);
     this.submitted.set(false);
+    this.validationErrors.set({});
     this.dialogVisible.set(true);
   }
 
@@ -118,6 +118,7 @@ export class SkpdComponent implements OnInit {
     this.currentItem.set({ ...item });
     this.isEditMode.set(true);
     this.submitted.set(false);
+    this.validationErrors.set({});
     this.dialogVisible.set(true);
   }
 
@@ -161,14 +162,11 @@ export class SkpdComponent implements OnInit {
 
   saveItem(): void {
     this.submitted.set(true);
+    this.validationErrors.set({});
     const current = this.currentItem();
 
-    if (!current.nama?.trim()) {
-      return;
-    }
-
     const formData: SkpdFormData = {
-      nama: current.nama,
+      nama: current.nama || '',
     };
 
     this.loading.set(true);
@@ -185,11 +183,18 @@ export class SkpdComponent implements OnInit {
           this.loadData(); // Reload data
         },
         error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Gagal memperbarui SKPD',
-          });
+          if (error?.status === 422 && error?.error?.errors) {
+            // Validation errors from backend
+            this.validationErrors.set(error.error.errors);
+          } else {
+            // Other errors show as toast
+            const errorMessage = error?.error?.message || 'Gagal memperbarui SKPD';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: errorMessage,
+            });
+          }
           this.loading.set(false);
           console.error('Error updating SKPD:', error);
         },
@@ -206,11 +211,18 @@ export class SkpdComponent implements OnInit {
           this.loadData(); // Reload data
         },
         error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Gagal menambahkan SKPD',
-          });
+          if (error?.status === 422 && error?.error?.errors) {
+            // Validation errors from backend
+            this.validationErrors.set(error.error.errors);
+          } else {
+            // Other errors show as toast
+            const errorMessage = error?.error?.message || 'Gagal menambahkan SKPD';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: errorMessage,
+            });
+          }
           this.loading.set(false);
           console.error('Error creating SKPD:', error);
         },
