@@ -106,7 +106,7 @@
         <label for="role">Role <span class="required">*</span></label>
         <p-select id="role" [options]="roles()" optionLabel="name" optionValue="name" placeholder="Pilih role"
             [ngModel]="currentItem().selectedRole" (ngModelChange)="updateField('selectedRole', $event)"
-            [disabled]="loading()" styleClass="w-full" />
+            [disabled]="loading()" styleClass="w-full" appendTo="body" />
         @if (validationErrors()['role']) {
         <small class="error-text">{{ validationErrors()['role'][0] }}</small>
         }
@@ -116,7 +116,8 @@
         <label for="skpd">SKPD @if (isSkpdRequired()) { <span class="required">*</span> }</label>
         <p-select id="skpd" [options]="skpds()" optionLabel="nama" optionValue="uuid" placeholder="Pilih SKPD"
             [ngModel]="currentItem().skpd_id" (ngModelChange)="updateField('skpd_id', $event)" [showClear]="true"
-            [filter]="true" filterPlaceholder="Cari SKPD..." [disabled]="loading()" styleClass="w-full" />
+            [filter]="true" filterPlaceholder="Cari SKPD..." [disabled]="loading()" styleClass="w-full"
+            appendTo="body" />
         @if (validationErrors()['skpd_id']) {
         <small class="error-text">{{ validationErrors()['skpd_id'][0] }}</small>
         }

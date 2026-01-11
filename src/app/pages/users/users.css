@@ -75,6 +75,16 @@
     width: 100%;
 }
 
+.form-field :deep(.p-select),
+.form-field :deep(.p-multiselect) {
+    min-height: 2.5rem;
+}
+
+.form-field :deep(.p-select .p-select-label),
+.form-field :deep(.p-multiselect .p-multiselect-label) {
+    padding: 0.625rem 0.75rem;
+}
+
 .w-full {
     width: 100%;
 }
