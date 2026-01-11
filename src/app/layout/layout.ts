@@ -1,8 +1,10 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { DrawerModule } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
+import { MenuModule } from 'primeng/menu';
+import { AuthService } from '../services/auth.service';
 
 interface MenuItem {
   label: string;
@@ -12,13 +14,16 @@ interface MenuItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, DrawerModule, ButtonModule, RippleModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, DrawerModule, ButtonModule, RippleModule, MenuModule],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutComponent {
+  protected readonly authService = inject(AuthService);
+
   protected readonly sidebarVisible = signal(false);
+  protected readonly loggingOut = signal(false);
 
   protected readonly menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: 'pi pi-home', route: '/dashboard' },
@@ -33,5 +38,20 @@ export class LayoutComponent {
 
   closeSidebar(): void {
     this.sidebarVisible.set(false);
+  }
+
+  logout(): void {
+    if (this.loggingOut()) return;
+
+    this.loggingOut.set(true);
+    this.authService.logout().subscribe({
+      next: () => {
+        this.authService.redirectToLogin();
+      },
+      error: () => {
+        // Even on error, clear auth and redirect
+        this.authService.redirectToLogin();
+      },
+    });
   }
 }

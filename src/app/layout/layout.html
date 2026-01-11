@@ -4,28 +4,16 @@
     <div class="sidebar-content">
       <div class="sidebar-header">
         <span class="sidebar-logo">BPKAD Pajak</span>
-        <p-button
-          icon="pi pi-times"
-          [rounded]="true"
-          [text]="true"
-          severity="secondary"
-          (click)="closeSidebar()"
-          aria-label="Tutup menu"
-        />
+        <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="secondary" (click)="closeSidebar()"
+          aria-label="Tutup menu" />
       </div>
       <nav class="sidebar-nav">
         @for (item of menuItems; track item.route) {
-          <a
-            class="nav-item"
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
-            (click)="closeSidebar()"
-            pRipple
-          >
-            <i [class]="item.icon"></i>
-            <span>{{ item.label }}</span>
-          </a>
+        <a class="nav-item" [routerLink]="item.route" routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }" (click)="closeSidebar()" pRipple>
+          <i [class]="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </a>
         }
       </nav>
     </div>
@@ -40,16 +28,11 @@
     </div>
     <nav class="sidebar-nav">
       @for (item of menuItems; track item.route) {
-        <a
-          class="nav-item"
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
-          pRipple
-        >
-          <i [class]="item.icon"></i>
-          <span>{{ item.label }}</span>
-        </a>
+      <a class="nav-item" [routerLink]="item.route" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }" pRipple>
+        <i [class]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
       }
     </nav>
   </div>
@@ -59,33 +42,15 @@
 <div class="main-wrapper">
   <!-- Header -->
   <header class="main-header">
-    <p-button
-      class="menu-toggle"
-      icon="pi pi-bars"
-      [rounded]="true"
-      [text]="true"
-      severity="secondary"
-      (click)="toggleSidebar()"
-      aria-label="Toggle menu"
-    />
+    <p-button class="menu-toggle" icon="pi pi-bars" [rounded]="true" [text]="true" severity="secondary"
+      (click)="toggleSidebar()" aria-label="Toggle menu" />
     <h1 class="header-title">Admin Dashboard</h1>
     <div class="header-actions">
-      <p-button
-        icon="pi pi-bell"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        [badge]="'3'"
-        badgeSeverity="danger"
-        aria-label="Notifikasi"
-      />
-      <p-button
-        icon="pi pi-user"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        aria-label="Profil"
-      />
+      @if (authService.user(); as user) {
+      <span class="user-name">{{ user.name }}</span>
+      }
+      <p-button icon="pi pi-sign-out" [rounded]="true" [text]="true" severity="secondary" (click)="logout()"
+        [loading]="loggingOut()" aria-label="Logout" pTooltip="Logout" />
     </div>
   </header>
 

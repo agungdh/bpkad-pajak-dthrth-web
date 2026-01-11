@@ -1,0 +1,34 @@
+<div class="login-container">
+    <p-card class="login-card">
+        <ng-template #header>
+            <div class="login-header">
+                <h1>BPKAD Pajak</h1>
+                <p>Silakan masuk untuk melanjutkan</p>
+            </div>
+        </ng-template>
+
+        <form (ngSubmit)="onSubmit()">
+            @if (errorMessage()) {
+            <p-message severity="error" [text]="errorMessage()!" styleClass="mb-4 w-full" />
+            }
+
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input pInputText id="username" type="text" [ngModel]="username()"
+                    (ngModelChange)="updateUsername($event)" name="username" placeholder="Masukkan username"
+                    autocomplete="username" [disabled]="loading()" required />
+            </div>
+
+            <div class="form-field">
+                <label for="password">Password</label>
+                <p-password id="password" [ngModel]="password()" (ngModelChange)="updatePassword($event)"
+                    name="password" placeholder="Masukkan password" [feedback]="false" [toggleMask]="true"
+                    [disabled]="loading()" autocomplete="current-password" styleClass="w-full" inputStyleClass="w-full"
+                    required />
+            </div>
+
+            <p-button type="submit" label="Masuk" [loading]="loading()" [disabled]="!username() || !password()"
+                styleClass="w-full" />
+        </form>
+    </p-card>
+</div>
