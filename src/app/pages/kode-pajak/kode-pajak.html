@@ -1,0 +1,86 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="page-header">
+    <h2>Data Kode Pajak</h2>
+    <p>Kelola data Kode Pajak</p>
+</div>
+
+<p-toolbar styleClass="crud-toolbar">
+    <ng-template #start>
+        <p-button label="Tambah" icon="pi pi-plus" severity="primary" (click)="openNew()" [disabled]="loading()" />
+    </ng-template>
+    <ng-template #end>
+        <div class="search-box">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" placeholder="Cari kode atau nama..." [ngModel]="searchQuery()"
+                (ngModelChange)="onSearch($event)" />
+        </div>
+    </ng-template>
+</p-toolbar>
+
+<p-table [value]="data()" [loading]="loading()" [tableStyle]="{ 'min-width': '40rem' }" [rowHover]="true" dataKey="uuid"
+    styleClass="crud-table" responsiveLayout="scroll" [lazy]="true" (onLazyLoad)="onLazyLoad($event)">
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="kode" style="width: 10rem">Kode <p-sortIcon field="kode" /></th>
+            <th pSortableColumn="nama">Nama <p-sortIcon field="nama" /></th>
+            <th style="width: 8rem">Aksi</th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-item>
+        <tr>
+            <td>{{ item.kode }}</td>
+            <td>{{ item.nama }}</td>
+            <td>
+                <div class="action-buttons">
+                    <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
+                        (click)="editItem(item)" aria-label="Edit" [disabled]="loading()" />
+                    <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                        (click)="deleteItem(item)" aria-label="Hapus" [disabled]="loading()" />
+                </div>
+            </td>
+        </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+        <tr>
+            <td colspan="3" class="empty-message">Tidak ada data Kode Pajak.</td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<!-- Cursor Pagination -->
+<div class="cursor-pagination">
+    <p-button icon="pi pi-chevron-left" label="Sebelumnya" [outlined]="true" [disabled]="!hasPrevPage() || loading()"
+        (click)="prevPage()" />
+    <span class="page-info">Total: {{ totalCount() }} Kode Pajak</span>
+    <p-button icon="pi pi-chevron-right" iconPos="right" label="Selanjutnya" [outlined]="true"
+        [disabled]="!hasNextPage() || loading()" (click)="nextPage()" />
+</div>
+
+<!-- Create/Edit Dialog -->
+<p-dialog [(visible)]="dialogVisible" [header]="isEditMode() ? 'Edit Kode Pajak' : 'Tambah Kode Pajak'" [modal]="true"
+    [style]="{ width: '400px' }" [draggable]="false" [resizable]="false" styleClass="crud-dialog">
+    <div class="form-field">
+        <label for="kode">Kode</label>
+        <input pInputText id="kode" [ngModel]="currentItem().kode" (ngModelChange)="updateKode($event)" autofocus
+            placeholder="Masukkan kode pajak" [class.ng-invalid]="validationErrors()['kode']" [disabled]="loading()" />
+        @if (validationErrors()['kode']) {
+        <small class="error-text">{{ validationErrors()['kode'][0] }}</small>
+        }
+    </div>
+
+    <div class="form-field">
+        <label for="nama">Nama</label>
+        <input pInputText id="nama" [ngModel]="currentItem().nama" (ngModelChange)="updateNama($event)"
+            placeholder="Masukkan nama" [class.ng-invalid]="validationErrors()['nama']" [disabled]="loading()" />
+        @if (validationErrors()['nama']) {
+        <small class="error-text">{{ validationErrors()['nama'][0] }}</small>
+        }
+    </div>
+
+    <ng-template #footer>
+        <p-button label="Batal" icon="pi pi-times" [text]="true" (click)="hideDialog()" [disabled]="loading()" />
+        <p-button label="Simpan" icon="pi pi-check" (click)="saveItem()" [loading]="loading()" />
+    </ng-template>
+</p-dialog>

@@ -1,0 +1,128 @@
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--p-text-color);
+}
+
+.page-header p {
+    margin: 0;
+    color: var(--p-text-muted-color);
+}
+
+/* Toolbar */
+:host ::ng-deep .crud-toolbar {
+    margin-bottom: 1rem;
+    border-radius: var(--p-border-radius-lg);
+}
+
+:host ::ng-deep .crud-toolbar .p-button {
+    margin-right: 0.5rem;
+}
+
+/* Table */
+:host ::ng-deep .crud-table {
+    background: var(--p-surface-card);
+    border-radius: var(--p-border-radius-lg);
+    overflow: hidden;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 2rem !important;
+    color: var(--p-text-muted-color);
+}
+
+/* Dialog Form */
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-field:last-of-type {
+    margin-bottom: 0;
+}
+
+.form-field label {
+    font-weight: 500;
+    color: var(--p-text-color);
+}
+
+.form-field input {
+    width: 100%;
+}
+
+.error-text {
+    color: var(--p-red-500);
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    :host ::ng-deep .crud-toolbar .p-toolbar-start {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    :host ::ng-deep .crud-toolbar .p-button {
+        margin-right: 0;
+    }
+
+    .cursor-pagination {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+/* Search Box */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--p-text-muted-color);
+    pointer-events: none;
+}
+
+.search-box input {
+    padding-left: 2.25rem;
+    width: 250px;
+}
+
+@media (max-width: 576px) {
+    .search-box input {
+        width: 100%;
+    }
+}
+
+/* Cursor Pagination */
+.cursor-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--p-surface-card);
+    border-radius: var(--p-border-radius-lg);
+}
+
+.page-info {
+    font-size: 0.875rem;
+    color: var(--p-text-muted-color);
+}
