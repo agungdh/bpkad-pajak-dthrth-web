@@ -1,0 +1,129 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="page-header">
+    <h2>Data User</h2>
+    <p>Kelola data pengguna sistem</p>
+</div>
+
+<p-toolbar styleClass="crud-toolbar">
+    <ng-template #start>
+        <p-button label="Tambah" icon="pi pi-plus" severity="primary" (click)="openNew()" [disabled]="loading()" />
+    </ng-template>
+    <ng-template #end>
+        <div class="search-box">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" placeholder="Cari nama, username..." [ngModel]="searchQuery()"
+                (ngModelChange)="onSearch($event)" />
+        </div>
+    </ng-template>
+</p-toolbar>
+
+<p-table [value]="data()" [loading]="loading()" [tableStyle]="{ 'min-width': '60rem' }" [rowHover]="true" dataKey="uuid"
+    styleClass="crud-table" responsiveLayout="scroll" [lazy]="true" (onLazyLoad)="onLazyLoad($event)">
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="name">Nama <p-sortIcon field="name" /></th>
+            <th pSortableColumn="username">Username <p-sortIcon field="username" /></th>
+            <th>SKPD</th>
+            <th>Role</th>
+            <th style="width: 8rem">Aksi</th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-item>
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.username }}</td>
+            <td>{{ item.skpd?.nama || '-' }}</td>
+            <td>
+                @for (role of item.roles; track role.name) {
+                <p-tag [value]="role.name" severity="info" styleClass="mr-1" />
+                }
+                @empty {
+                <span class="text-muted">-</span>
+                }
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
+                        (click)="editItem(item)" aria-label="Edit" [disabled]="loading()" />
+                    <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                        (click)="deleteItem(item)" aria-label="Hapus" [disabled]="loading()" />
+                </div>
+            </td>
+        </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+        <tr>
+            <td colspan="5" class="empty-message">Tidak ada data User.</td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<!-- Cursor Pagination -->
+<div class="cursor-pagination">
+    <p-button icon="pi pi-chevron-left" label="Sebelumnya" [outlined]="true" [disabled]="!hasPrevPage() || loading()"
+        (click)="prevPage()" />
+    <span class="page-info">Total: {{ totalCount() }} User</span>
+    <p-button icon="pi pi-chevron-right" iconPos="right" label="Selanjutnya" [outlined]="true"
+        [disabled]="!hasNextPage() || loading()" (click)="nextPage()" />
+</div>
+
+<!-- Create/Edit Dialog -->
+<p-dialog [(visible)]="dialogVisible" [header]="isEditMode() ? 'Edit User' : 'Tambah User'" [modal]="true"
+    [style]="{ width: '500px' }" [draggable]="false" [resizable]="false" styleClass="crud-dialog">
+    <div class="form-field">
+        <label for="name">Nama</label>
+        <input pInputText id="name" [ngModel]="currentItem().name" (ngModelChange)="updateField('name', $event)"
+            autofocus placeholder="Masukkan nama" [class.ng-invalid]="validationErrors()['name']"
+            [disabled]="loading()" />
+        @if (validationErrors()['name']) {
+        <small class="error-text">{{ validationErrors()['name'][0] }}</small>
+        }
+    </div>
+
+    <div class="form-field">
+        <label for="username">Username</label>
+        <input pInputText id="username" [ngModel]="currentItem().username"
+            (ngModelChange)="updateField('username', $event)" placeholder="Masukkan username"
+            [class.ng-invalid]="validationErrors()['username']" [disabled]="loading()" />
+        @if (validationErrors()['username']) {
+        <small class="error-text">{{ validationErrors()['username'][0] }}</small>
+        }
+    </div>
+
+    <div class="form-field">
+        <label for="password">Password {{ isEditMode() ? '(kosongkan jika tidak diubah)' : '' }}</label>
+        <p-password id="password" [ngModel]="currentItem().password" (ngModelChange)="updateField('password', $event)"
+            placeholder="Masukkan password" [feedback]="false" [toggleMask]="true" [disabled]="loading()"
+            styleClass="w-full" inputStyleClass="w-full" />
+        @if (validationErrors()['password']) {
+        <small class="error-text">{{ validationErrors()['password'][0] }}</small>
+        }
+    </div>
+
+    <div class="form-field">
+        <label for="role">Role <span class="required">*</span></label>
+        <p-select id="role" [options]="roles()" optionLabel="name" optionValue="name" placeholder="Pilih role"
+            [ngModel]="currentItem().selectedRole" (ngModelChange)="updateField('selectedRole', $event)"
+            [disabled]="loading()" styleClass="w-full" />
+        @if (validationErrors()['role']) {
+        <small class="error-text">{{ validationErrors()['role'][0] }}</small>
+        }
+    </div>
+
+    <div class="form-field">
+        <label for="skpd">SKPD @if (isSkpdRequired()) { <span class="required">*</span> }</label>
+        <p-select id="skpd" [options]="skpds()" optionLabel="nama" optionValue="uuid" placeholder="Pilih SKPD"
+            [ngModel]="currentItem().skpd_id" (ngModelChange)="updateField('skpd_id', $event)" [showClear]="true"
+            [filter]="true" filterPlaceholder="Cari SKPD..." [disabled]="loading()" styleClass="w-full" />
+        @if (validationErrors()['skpd_id']) {
+        <small class="error-text">{{ validationErrors()['skpd_id'][0] }}</small>
+        }
+    </div>
+
+    <ng-template #footer>
+        <p-button label="Batal" icon="pi pi-times" [text]="true" (click)="hideDialog()" [disabled]="loading()" />
+        <p-button label="Simpan" icon="pi pi-check" (click)="saveItem()" [loading]="loading()" />
+    </ng-template>
+</p-dialog>

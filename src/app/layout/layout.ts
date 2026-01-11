@@ -29,6 +29,7 @@ export class LayoutComponent {
     { label: 'Dashboard', icon: 'pi pi-home', route: '/dashboard' },
     { label: 'Data SKPD', icon: 'pi pi-building', route: '/skpd' },
     { label: 'Kode Pajak', icon: 'pi pi-tag', route: '/kode-pajak' },
+    { label: 'Users', icon: 'pi pi-users', route: '/users' },
     { label: 'Laporan', icon: 'pi pi-chart-bar', route: '/dashboard' },
     { label: 'Pengaturan', icon: 'pi pi-cog', route: '/dashboard' },
   ];
